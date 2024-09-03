@@ -1,0 +1,27 @@
+definitions:
+  model.HealthCheckResponse:
+    properties:
+      master:
+        type: string
+      slave:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: do health check for databases
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HealthCheckResponse'
+      summary: Health check
+      tags:
+      - check
+swagger: "2.0"
