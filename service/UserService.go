@@ -57,6 +57,7 @@ func (u UserService) Login(ctx context.Context, user model.User) (*model.UserRes
 }
 
 func (u UserService) Register(ctx context.Context, user model.User) (int, error) {
+
 	register, err := u.repoRegistry.GetUserRepository().Register(ctx, user)
 	if err != nil {
 		return 0, err

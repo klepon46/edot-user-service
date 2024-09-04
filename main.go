@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
+	initDb "github.com/klepon46/edot-user-service/cmd/init"
 	http2 "github.com/klepon46/edot-user-service/delivery/http"
-	"github.com/klepon46/edot-user-service/model"
 	"github.com/klepon46/edot-user-service/repository"
 	"github.com/klepon46/edot-user-service/service"
+	"log"
 	"net/http"
 
 	//"github.com/klepon46/edot-user-service/config"
@@ -15,6 +17,7 @@ import (
 	//"time"
 	_ "time/tzdata"
 
+	_ "github.com/go-sql-driver/mysql"
 	// Import third parties here
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
@@ -22,9 +25,20 @@ import (
 )
 
 func main() {
-	users := []model.User{}
+	dsName := fmt.Sprintf(
+		"%s:%s@(%s:%d)/%s?parseTime=true",
+		"root", "", "localhost", 3306, "edot_service",
+	)
 
-	userRepo := repository.NewUserRepository(&users)
+	db, err := sqlx.Connect("mysql", dsName)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	initalizer := initDb.NewInitDb(db)
+	initalizer.Init()
+
+	userRepo := repository.NewUserRepository(db)
 	repoRegistry := repository.NewRegistryRepository(userRepo)
 
 	userSvc := service.NewUserService(repoRegistry)
@@ -47,7 +61,7 @@ func main() {
 		Handler: engine,
 	}
 
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		return
 	}
